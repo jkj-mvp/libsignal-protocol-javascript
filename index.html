@@ -4,13 +4,7 @@
     <meta charset="UTF-8">
     <title>Justino Client Signal Test</title>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
-    <script src="./index.js" type="text/javascript"></script>
-    <script src="./dist/libsignal-protocol.js" type="text/javascript"></script> 
-    <script src="./src/Curve.js" type="text/javascript"></script>
-    <script src="./src/crypto.js" type="text/javascript"></script>
-    <script src="./src/KeyHelper.js" type="text/javascript"></script> 
-    <script src="./InMemorySignalProtocolStore.js" type="text/javascript"></script>
-    <script src="./client.js" type="text/javascript"></script>
+
 
     <link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
@@ -29,6 +23,42 @@
         </form>
         <button type="button" id="send-message">Send</button>
     </div>
+
+    <!-- START: Signal Libraries & Helper JS files --> 
+        
+        <!-- TEST JS functions --> 
+        <script src="./index.js" type="text/javascript"></script>
+        
+        <!-- As required: --> 
+        <script src="./dist/libsignal-protocol.js" type="text/javascript"></script> 
+
+        <!-- curve25519 files --> 
+        <script type="text/javascript" src="./build/curve25519_concat.js"></script>
+        <script type="text/javascript" src="./build/curve25519_compiled.js"></script>
+        <script type="text/javascript" src="./src/curve25519_worker_manager.js"></script>
+        <script type="text/javascript" src="./build/components_concat.js"></script>
+
+        <!-- Registration & Session Creation: Curve, Crypto and Session JS files --> 
+        <script type="text/javascript" src="./src/Curve.js" data-cover></script>
+        <script type="text/javascript" src="./src/crypto.js" data-cover></script>
+        <script type="text/javascript" src="./src/helpers.js" data-cover></script>
+        <script type="text/javascript" src="./src/KeyHelper.js" data-cover></script>
+        <script type="text/javascript" src="./src/SignalProtocolAddress.js" data-cover></script>
+        <script type="text/javascript" src="./src/SessionBuilder.js" data-cover></script>
+        <script type="text/javascript" src="./src/SessionCipher.js" data-cover></script>
+        <script type="text/javascript" src="./build/protobufs_concat.js" data-cover></script>
+        <script type="text/javascript" src="./src/SessionRecord.js" data-cover></script>
+        <script type="text/javascript" src="./src/SessionLock.js" data-cover></script>
+        <script type="text/javascript" src="./src/NumericFingerprint.js" data-cover></script>
+
+        <!-- To Store the keys --> 
+        <script type="text/javascript" src="./InMemorySignalProtocolStore.js"></script>
+
+        <!-- Client Signal: --> 
+        <script type="text/javascript" src="./client.js"></script>
+
+    <!-- END:   Signal Libraries & Helper JS files  --> 
+
 
 </body>
 
