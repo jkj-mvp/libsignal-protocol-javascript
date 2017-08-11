@@ -2,36 +2,26 @@ KeyHelper = libsignal.KeyHelper;
 
 const store = new SignalProtocolStore();
 
-// -- const registrationId = KeyHelper.generateRegistrationId();
-// Store registrationId somehwere durable and safe.
-// -- console.log('My registrationId is: ', registrationId);
 
-// let longTermKeyPair = {};  --> not needed 
+const generateIdentity = async (store) => {
+    // Generate Registration ID 
+    const regId = await KeyHelper.generateRegistrationId();
 
-//--const keyID = 1337; // Our made up key ID 
+    // Generate Identity Key Pair 
+    const identKeyPair = await KeyHelper.generateIdentityKeyPair();
 
-// const registerID = () => {}; 
- const keyBundle = {}; 
+    console.log("Reg id: ", regId);
+    console.log("Ident key: ", identKeyPair);
 
-
-function generateIdentity(store) {
-    return Promise.all([
-        KeyHelper.generateRegistrationId(),
-        KeyHelper.generateIdentityKeyPair()
-    ]).then((result) => {
-        // result[0] --> registration ID 
-        console.log("Reg id: ", result[0]); 
-        console.log("Ident key: ", result[1]); 
-        // result[1] --> identity key pair 
-        store.put('registrationId', result[0]);
-        store.put('identityKey', result[1]);
-    });
+    // Store Registration ID and Key Pair in the store
+    store.put('registrationId', regId);
+    store.put('identityKey', identKeyPair);
 }
+
 
 function generateKeysBundle(store) {
     // check our store for Identity Key Pair and registration ID
     // return them  as promises 
-
     const keyID = 1337; // Our made up key ID 
 
     return Promise.all([
@@ -41,94 +31,145 @@ function generateKeysBundle(store) {
         // store Identity Key Pair and Registration ID in temp variables
         var regId = result[0];
         var identKeyPair = result[1];
-        console.log("identKeyPair is: ", identKeyPair); 
+
 
         // generatePreKey and signedPreKeys 
         return Promise.all([
             KeyHelper.generatePreKey(keyID), // fix  
             KeyHelper.generateSignedPreKey(identKeyPair, keyID) // identKey, keyId
         ]).then((keys) => {
-            const preKey = keys[0]; 
-            console.log("our PreKeyPair is: ", preKey); 
-            const signedPreKey = keys[1]; 
-            console.log("our signedPreKeyPair is: ", PreKey); 
+            const preKey = keys[0];
+            console.log("our PreKeyPair is: ", preKey);
+            const signedPreKey = keys[1];
+            console.log("our signedPreKeyPair is: ", preKey);
+            console.log('keys is', keys)
 
             // Store keys 
-            store.storePreKey(keyID, preKey.keyPair); 
-            store.storeSignedPreKey(keyID, signedPreKey.keyPair); 
+            store.storePreKey(keyID, preKey.keyPair);
+            store.storeSignedPreKey(keyID, signedPreKey.keyPair);
 
             // Bundle all the keys 
+            console.log("Type of identity key pair ", typeof identKeyPair);
+            
             return {
-                identityKey: identKeyPair.pubKey, 
-                registrationId: regId, 
+                registrationId: regId,
+                identityKey: util.toArrayBuffer(identKeyPair.pubKey), 
                 preKey: {
-                    keyId: keyID, 
-                    publicKey: preKey.keyPair.pubKey, 
-                }, 
+                    keyId: keyID,
+                    publicKey: preKey.keyPair.pubKey,
+                },
                 signedPreKey: {
                     keyId: keyID,
-                    publicKey: signedPreKey.keyPair.pubKey, 
+                    publicKey: signedPreKey.keyPair.pubKey,
                     signature: signedPreKey.signature
                 }
-            }; 
+            };
 
         });
     });
 }
 
-generateIdentity(store);
-generateKeysBundle(store); 
+let keyBundle = {};
+
+generateIdentity(store).then(async () => {
+    keyBundle = await generateKeysBundle(store);
+    console.log('our key bundle is', keyBundle);
+});
 
 
 
-//const randomObject = generateKeysBundle(store); 
-//console.log(generateKeyBundle(store));
+// const janelleRecipientId = "sadlfjadsjflas";
+// const janelleDeviceId = 5;
+// let recipientAddress = '';
 
-// KeyHelper.generateIdentityKeyPair().then((identityKeyPair) => {
-//     // keyPair -> { pubKey: ArrayBuffer, privKey: ArrayBuffer }
-//     // Store identityKeyPair somewhere durable and safe.
-//     console.log('My identityKeyPair is: ', identityKeyPair);
-//     console.log("Pub key ", identityKeyPair.pubKey); 
-//     store.put("identityKey", identityKeyPair); 
-//     // longTermKeyPair =  identityKeyPair; // store.getIdentityKeyPair(); 
 
-//     KeyHelper.generatePreKey(keyID).then(function(preKey) {
-//         store.storePreKey(preKey.keyId, preKey.keyPair);
-//         console.log("Our prekeys are: ", preKey);
 
-//         KeyHelper.generateSignedPreKey(identityKeyPair, keyID).then(function(signedPreKey) {
-//             store.storeSignedPreKey(signedPreKey.keyId, signedPreKey.keyPair);
-//             console.log("Our signedPreKey ", signedPreKey); 
+var janelle_store = new SignalProtocolStore();
+var justino_store = new SignalProtocolStore();
 
-            
-//             // RIGHT HERE 
-//             // Retrieve: 1) identityKeyPair 2) preKeyPair 3) signedPreKeyPair  TO SEND to server 
-//             // 1: store.getIdentityKeyPair(); 
-//             store.getIdentityKeyPair().then( identKeyPair => {
-//                 console.log("For server - longTermKeys: ", identKeyPair);
-//                 keyBundle.identityKeyPair = identKeyPair;   
-//             });
 
-//             // 2: store.loadPreKey(keyID); 
-//             store.loadPreKey(keyID).then( ourPreKey => {
-//                 console.log("For server - PreKey: ", ourPreKey); 
-//                 keyBundle.preKey = ourPreKey; 
-//             });
-            
+var justino_address = new libsignal.SignalProtocolAddress("YYYYY", 1);
+var janelle_address = new libsignal.SignalProtocolAddress("BCBCB", 65);
 
-//             // 3: store.loadSignedPreKey(keyID); 
-//             store.loadSignedPreKey(keyID).then( ourSignedPreKeys => {
-//                 console.log("For server - signedPreKey: ", ourSignedPreKeys); 
-//                 keyBundle.signedPreKey = ourSignedPreKeys; 
-//             }); 
+//janelle_store.address = janelle_address; 
+
+var justinoPreKeyId = 1337;
+var justinoSignedKeyId = 1;
+
+    Promise.all([
+        generateIdentity(janelle_store),
+        generateIdentity(justino_store)
+    ]).then(() => {
+        return generateKeysBundle(justino_store, justinoPreKeyId, justinoSignedKeyId);
+    }).then(function(preKeyBundle) {
+        var builder = new libsignal.SessionBuilder(janelle_store, justino_address);
+        var builder2 = new libsignal.SessionBuilder(justino_store, janelle_address);
+
+        console.log("Justino's address: ", justino_address);
+        console.log("Janelle's address: ", janelle_address);
+
+        //builder.storeSession(); // identifier, record 
+
+        return builder.processPreKey(preKeyBundle).then(() => {
+            var originalMessage = util.toArrayBuffer("justino");
+
+            console.log("This is originalMessage: ", originalMessage);
+            var janelleSessionCipher = new libsignal.SessionCipher(janelle_store, justino_address);
+            var justinoSessionCipher = new libsignal.SessionCipher(justino_store, janelle_address);
+
+            //janelle encryption
+            janelleSessionCipher.encrypt(originalMessage).then(function(ciphertext) {
+                console.log("Our ciphertext is (inside Janelle encrypt): ", ciphertext);
+                return justinoSessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary');
+            }).then(function(plaintext) {
+                alert(util.toString(plaintext));
+            });
+
+            //justino encryption
+            justinoSessionCipher.encrypt(originalMessage).then(function(ciphertext) {
+                return janelleSessionCipher.decryptWhisperMessage(ciphertext.body, 'binary');
+            }).then(function(plaintext) {
+                assertEqualBuffers(plaintext, originalMessage);
+            });
+        });
+    });
+
+
+// Start Session 
+// const startMySession = async (recipientId, recipientDeviceId, store, recipientKeyBundle) => {
+//     recipientAddress = new libsignal.SignalProtocolAddress(recipientId, recipientDeviceId);
+//     const sessionBuilder = new libsignal.SessionBuilder(store, recipientAddress);
+
+//     const sessionPromise = await sessionBuilder.processPreKey(recipientKeyBundle);
+
+//     return sessionPromise;
+
+// }
+
+// let plaintext = "Hi Janelle!!";
+// const sendMyMessage = (plaintext, store, recipientAddress, sessionPromise) => {
+//     //message from cryptpad
+//     const sessionCipher = new libsignal.SessionCipher(store, recipientAddress);
+
+//     sessionPromise.then( () => {
+//         sessionCipher.encrypt(plaintext).then((ciphertext) => {
+//             console.log('Plaintext - managed to pass sessionPromise', plaintext);
+//             console.log('Ciphertext - managed to pass sessionPromise', ciphertext);
+
+//             handle(ciphertext.type, ciphertext.body);
 //         });
-//     }); 
+//     });
+// }
+
+
+
+// startMySession(janelleRecipientId, janelleDeviceId, store, keyBundle).then(() => {
+//     sendMyMessage(plaintext, store, recipientAddress, startMySession);
 // });
 
-// console.log("Our Key bundle is: ", keyBundle); 
-// ---------------------------------------------------------
-// // SESSION 
-// var address = new libsignal.SignalProtocolAddress(recipientId, deviceId); 
+
+// SESSION 
+// var address = new libsignal.SignalProtocolAddress(recipientId, deviceId);
 
 // // Instantiate a SessionBuilder for a remote recipientId + deviceId tuple.
 // SessionBuilder = new libsignal.SessionBuilder(store, address);
@@ -140,20 +181,21 @@ generateKeysBundle(store);
 //     registrationId: Number,
 //     identityKey: ArrayBuffer,
 //     signedPreKey: {
-//         keyId     : Number,
-//         publicKey : ArrayBuffer,
-//         signature : ArrayBuffer
+//         keyId: Number,
+//         publicKey: ArrayBuffer,
+//         signature: ArrayBuffer
 //     },
 //     preKey: {
-//         keyId     : Number,
-//         publicKey : ArrayBuffer
+//         keyId: Number,
+//         publicKey: ArrayBuffer
 //     }
 // });
 
 // promise.then(function onsuccess() {
-//   // encrypt messages
+//     // encrypt messages
+
 // });
 
 // promise.catch(function onerror(error) {
-//   // handle identity key conflict
+//     // handle identity key conflict
 // });
