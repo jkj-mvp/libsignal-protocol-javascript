@@ -25,6 +25,7 @@
     "mocha": "^2.4.5"
   },
   "scripts": {
+    "start": "node /server/server.js", 
     "test": "grunt test",
     "lint": "grunt jshint"
   }
