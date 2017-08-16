@@ -4,9 +4,13 @@
   "version": "1.1.2",
   "license": "GPL-3.0",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "bytebuffer": "^3.5.5",
     "express": "^4.15.4",
+    "fs": "0.0.1-security",
     "long": "^3.1.0",
+    "mongoose": "^4.11.7",
+    "path": "^0.12.7",
     "protobufjs": "5.0.1"
   },
   "devDependencies": {
@@ -26,6 +30,7 @@
     "mocha": "^2.4.5"
   },
   "scripts": {
+    "start": "node server/server.js",
     "test": "grunt test",
     "lint": "grunt jshint"
   }

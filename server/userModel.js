@@ -2,14 +2,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-const mLabURI = 'mongodb://admindb_test1:56@z!opTest@ds155841.mlab.com:55841/signal_testdb'; 
+const mLabURI = 'mongodb://signaltest:1234@ds137730.mlab.com:37730/signaluser'; 
 
 const URI = process.env.MONGO_URI || mLabURI; 
 
-mongoose.connect(URI); 
+mongoose.connect(mLabURI);
 mongoose.connection.once('open', () => {
-    console.log('Connected to database!'); 
-}); 
+    console.log('Connected with database!');
+});
 
 const userSchema = new Schema({
     key_bundle: {
@@ -17,17 +17,17 @@ const userSchema = new Schema({
             type: Number
         },
         identityKey: {
-            type: ArrayBuffer
+            type: Buffer
         },
         signedPreKey: {
             keyId: {
                 type: Number
             },
             publicKey: {
-                type: ArrayBuffer
+                type: Buffer
             },
             signature: {
-                type: ArrayBuffer
+                type: Buffer
             }
         },
         preKey: {
@@ -35,7 +35,7 @@ const userSchema = new Schema({
                 type: Number
             },
             publicKey: {
-                type: ArrayBuffer
+                type: Buffer
             }
         }
     }, 
@@ -44,7 +44,7 @@ const userSchema = new Schema({
             type: Date
         },
         last_message: {
-            type: ArrayBuffer
+            type: Buffer
         } 
     }
 });
@@ -52,3 +52,4 @@ const userSchema = new Schema({
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+

@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const client = require('./client');  // not here
+
 
 //require the database model
 const UserController = require('./userController');
@@ -21,7 +21,7 @@ app.use(function (req, res, next) {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, './')));
+//app.use(express.static(path.join(__dirname, './')));
 
 
 
@@ -36,57 +36,24 @@ app.get('/', (req, res) => {
 
 // Sender/Client register's their identity and keyBundle with the server
 app.post('/register', (req, res) => {
-    // Receive PreKey Bundle
-    
-    // -------------- TEST -------------------- 
-    // attach test key bundle to req.body 
-    req.body.keyBundle = {
-        key_bundle: {
-            registrationId: {
-                type: 111
-            },
-            identityKey: {
-                type: new Int32Array(new ArrayBuffer(8))
-            },
-            signedPreKey: {
-                keyId: {
-                    type: 222
-                },
-                publicKey: {
-                    type: new Int32Array(new ArrayBuffer(8))
-                },
-                signature: {
-                    type: new Int32Array(new ArrayBuffer(8))
-                }
-            },
-            preKey: {
-                keyId: {
-                    type: 333
-                },
-                publicKey: {
-                    type: new Int32Array(new ArrayBuffer(8))
-                }
-            }
-        },
-        last_time_connected: {
-            last_time: {
-                type: Date.now()
-            },
-            last_message: {
-                type: new Int32Array(new ArrayBuffer(8))
-            }
-        }
-    }
-
+    // Receive PreKey Bundle    
     // call UserController.saveIdentity passing req and res 
     UserController.saveIdentity(req, res);
-
 
 });
 
 // Sender requests receiver's preKey Bundle 
 app.get('/connect', (req, res, next) => {
-    // Send Receiver's Pre-Key Bundle 
+    
+
+    req.body = {
+        "key_bundle": {
+           "registrationId": 111
+         }
+       };
+
+       UserController.findIdentity(req, res);
+       
 });
 
 // Receive shared secret 
@@ -98,5 +65,5 @@ app.get('/session', (req, res, next) => {
 app.post('/session', )
 
 app.listen(3030, () => {
-    console.log('Listening on port 3000!');
+    console.log('Listening on port 3030!');
 });
