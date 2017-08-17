@@ -27,10 +27,11 @@
     "grunt-preen": "^1.0.0",
     "grunt-saucelabs": "^8.3.3",
     "jquery": "^2.2.3",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "nodemon": "^1.11.0"
   },
   "scripts": {
-    "start": "node server/server.js",
+    "start": "nodemon server/server.js",
     "test": "grunt test",
     "lint": "grunt jshint"
   }

@@ -1,7 +1,29 @@
+function registerWithServer() {
+
+    let keyBundle = {}
+    generateIdentity(store).then(async () => {
+        return keyBundle = await generateKeysBundle(store);
+        // console.log('our key bundle is', keyBundle);
+    });
+}
+
+registerWithServer(obj).then((obj) => {
+    $.ajax({
+        type: 'POST',
+        url: 'http://localhost:3030/register',
+        data: JSON.stringify(keyBundle),  // POTENTIAL PROBLEM HERE 
+        dataType: 'json'
+    }).done((data) => {
+        console.log(data);
+    });
+});
+
+
+
 
 
 // function generateIdentity(store) {
-    
+
 //     return Promise.all([
 //         KeyHelper.generateRegistrationId(),
 //         KeyHelper.generateIdentityKeyPair()
@@ -17,10 +39,10 @@
 
 const generateIdentity = async (store) => {
     // Generate Registration ID 
-    const regId = await KeyHelper.generateRegistrationId(); 
+    const regId = await KeyHelper.generateRegistrationId();
 
     // Generate Identity Key Pair 
-    const identKeyPair = await KeyHelper.generateIdentityKeyPair(); 
+    const identKeyPair = await KeyHelper.generateIdentityKeyPair();
 
     // Store Registration ID and Key Pair in the store
     store.put('registrationId', regId);
@@ -48,29 +70,29 @@ function generateKeysBundle(store) {
             KeyHelper.generatePreKey(keyID), // fix  
             KeyHelper.generateSignedPreKey(identKeyPair, keyID) // identKey, keyId
         ]).then((keys) => {
-            const preKey = keys[0]; 
-            console.log("our PreKeyPair is: ", preKey); 
-            const signedPreKey = keys[1]; 
-            console.log("our signedPreKeyPair is: ", signedPreKey); 
+            const preKey = keys[0];
+            console.log("our PreKeyPair is: ", preKey);
+            const signedPreKey = keys[1];
+            console.log("our signedPreKeyPair is: ", signedPreKey);
 
             // Store keys 
-            store.storePreKey(keyID, preKey.keyPair); 
-            store.storeSignedPreKey(keyID, signedPreKey.keyPair); 
+            store.storePreKey(keyID, preKey.keyPair);
+            store.storeSignedPreKey(keyID, signedPreKey.keyPair);
 
             // Bundle all the keys 
             return {
-                identityKey: identKeyPair.pubKey, 
-                registrationId: regId, 
+                identityKey: identKeyPair.pubKey,
+                registrationId: regId,
                 preKey: {
-                    keyId: keyID, 
-                    publicKey: preKey.keyPair.pubKey, 
-                }, 
+                    keyId: keyID,
+                    publicKey: preKey.keyPair.pubKey,
+                },
                 signedPreKey: {
-                    keyId: keyID, 
-                    publicKey: signedPreKey.keyPair.pubKey, 
+                    keyId: keyID,
+                    publicKey: signedPreKey.keyPair.pubKey,
                     signature: signedPreKey.signature
                 }
-            }; 
+            };
 
         });
     });
@@ -105,7 +127,7 @@ function generateKeysBundle(store) {
 //             store.storeSignedPreKey(signedPreKey.keyId, signedPreKey.keyPair);
 //             console.log("Our signedPreKey ", signedPreKey); 
 
-            
+
 //             // RIGHT HERE 
 //             // Retrieve: 1) identityKeyPair 2) preKeyPair 3) signedPreKeyPair  TO SEND to server 
 //             // 1: store.getIdentityKeyPair(); 
@@ -119,7 +141,7 @@ function generateKeysBundle(store) {
 //                 console.log("For server - PreKey: ", ourPreKey); 
 //                 keyBundle.preKey = ourPreKey; 
 //             });
-            
+
 
 //             // 3: store.loadSignedPreKey(keyID); 
 //             store.loadSignedPreKey(keyID).then( ourSignedPreKeys => {
@@ -135,3 +157,16 @@ function generateKeysBundle(store) {
 
 
 
+const obj =  {
+        "registrationId": 7777,
+        "identityKey": "sdfjaspdfjasdfjsladf",
+        "signedPreKey": {
+            "keyId": 222,
+            "publicKey": "dfasgSGAWGASGWRGVASGSA",
+            "signature": "DGASGASGDAGSfasvvdrse5vvys6"
+        }, 
+        "preKey": {
+            "keyId": 333,
+            "publicKey": "rtyc45vycw4vyc4s5yscg54"
+        }
+}; 

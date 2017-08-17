@@ -24,36 +24,23 @@ app.use(bodyParser.json());
 //app.use(express.static(path.join(__dirname, './')));
 
 
-
-// app.post('/register', (req, res) => {
-//     //registerId()
-//     //res.status(200).send();
-//     //else res.status(401).send('Invalid authentication credentials');
-// });
 app.get('/', (req, res) => {
+    // res.sendFile(path.resolve('index.html')); 
     res.status(200).send("Welcome to SpeakEasy.io");
 });
 
-// Sender/Client register's their identity and keyBundle with the server
+// Client register their identity and keyBundle with the server
 app.post('/register', (req, res) => {
     // Receive PreKey Bundle    
-    // call UserController.saveIdentity passing req and res 
+    // call UserController.saveIdentity passing req and res
     UserController.saveIdentity(req, res);
-
 });
 
 // Sender requests receiver's preKey Bundle 
-app.get('/connect', (req, res, next) => {
-    
+app.get('/connect/:registrationId', (req, res, next) => {
+    console.log("query string: ", req.params.registrationId); 
 
-    req.body = {
-        "key_bundle": {
-           "registrationId": 111
-         }
-       };
-
-       UserController.findIdentity(req, res);
-       
+    UserController.findIdentity(req, res);
 });
 
 // Receive shared secret 
@@ -62,8 +49,7 @@ app.get('/session', (req, res, next) => {
 });
 
 // Send shared secret (message)
-app.post('/session', )
-
+//app.post('/session', )
 app.listen(3030, () => {
     console.log('Listening on port 3030!');
 });
