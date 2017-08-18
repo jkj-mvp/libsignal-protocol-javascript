@@ -82,54 +82,78 @@ function registerWithServer() {
         // console.log("(C): 7) our key bundle is", keyBundle);
         // console.log("(C): 8) Our stringified key bundle is: ", JSON.stringify(keyBundle));
         // ajaxCall(keyBundle); 
-        ajaxCall(await generateKeysBundle(store)); 
+        ajaxRegisterKeys(await generateKeysBundle(store)); 
 
         // return keyBundle;  
     });
 }
 
 
-const ajaxCall = (dataObj) => {
+const ajaxRegisterKeys = (dataObj) => {
     console.log('(C) 9) Our OBJ before ajax call: ', dataObj); 
     console.log('(C) 10) typeof OBJ before ajax call: ', typeof dataObj); 
+
+    // this is where we could possibly attach our recipient ID and device ID 
+    // Divice ID could be 0 since we only have 1 device 
+    // We can make recipient ID equal to a string, say a unique username @justino 
+
     $.ajax({
         type: 'POST',
         url: 'http://localhost:3030/register',
         contentType: 'application/json; charset=UTF-8',
-        data: JSON.stringify(dataObj)  // POTENTIAL PROBLEM HERE 
+        data: JSON.stringify(dataObj) + '{}' // POTENTIAL PROBLEM HERE 
     }).done((d) => {
         console.log('Our data - inside of ajax call - is: ', d);
     });
 }
 
-// data: JSON.stringify(await generateKeysBundle(store)), 
-
 //**************START SESSION*****************/
-//sender
-//receiver
-//message (what type of variable)
 
-//generate identity 
-//generate keys bundle for the sender
-//create a session builder for a receiver's ID + device ID
-//processPreKey fetched from server (RETURNS A PROMISE that resolves once a session is created 
-// + saved in the store. OR rejects if the identityKey != saved identityKey for this address)
-//create a session cipher
-//encrypt sender's message
-//decrypt receiver's message
-//
+// request Receiver's Key Bundle 
+
+/* 
+function requestReceiversBundle() {
+    // ajax GET request to server at  /connect/:registrationId 
+    $.ajax({
+        type: 'GET', 
+        url: 'http://localhost:3030/connect',
+    }).done(() => {
+
+    }); 
+    // receive Receiver's key bundle and store it in store??? 
+
+    // 
+}
+
+function startSession() {
+    // 
+
+}
+*/ 
+
+// create a session builder for a receiver's ID + device ID - (Receiver's address )
+
+
+// processPreKey fetched from server (RETURNS A PROMISE that resolves once a session is created 
+//  + saved in the store. OR rejects if the identityKey != saved identityKey for this address)
+
+
+// create a session cipher  
+
+
+// encrypt sender's message
+// decrypt receiver's message
+
+
+
+
+
 
 // const janelleRecipientId = "sadlfjadsjflas";
 // const janelleDeviceId = 5;
 // let recipientAddress = '';
 
-
 /*
-
-var janelle_store = new SignalProtocolStore();
-var justino_store = new SignalProtocolStore();
-
-
 var justino_address = new libsignal.SignalProtocolAddress("YYYYY", 1);
 var janelle_address = new libsignal.SignalProtocolAddress("BCBCB", 65);
 

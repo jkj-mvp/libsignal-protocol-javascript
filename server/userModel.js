@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-const mLabURI = 'mongodb://signaltest:1234@ds137730.mlab.com:37730/signaluser'; 
+const mLabURI = 'mongodb://jmora3:Mlab.JMpass3!@ds155841.mlab.com:55841/signal_testdb'; 
+// Janelle's Mlab uri: 'mongodb://signaltest:1234@ds137730.mlab.com:37730/signaluser'
 
 const URI = process.env.MONGO_URI || mLabURI; 
 
@@ -12,6 +13,10 @@ mongoose.connection.once('open', () => {
 });
 
 const userSchema = new Schema({
+    user_info: {
+        recipientId: String, 
+        deviceId: Number
+    }, 
     key_bundle: {
         registrationId: {
             type: Number
