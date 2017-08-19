@@ -27,17 +27,17 @@ const userSchema = new Schema({
             type: Number
         },
         identityKey: {
-            type: Buffer
+            type: String
         },
         signedPreKey: {
             keyId: {
                 type: Number
             },
             publicKey: {
-                type: Buffer
+                type: String
             },
             signature: {
-                type: Buffer
+                type: String
             }
         },
         preKey: {
@@ -45,7 +45,7 @@ const userSchema = new Schema({
                 type: Number
             },
             publicKey: {
-                type: Buffer
+                type: String
             }
         }
     }, 
