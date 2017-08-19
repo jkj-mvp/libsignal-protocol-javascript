@@ -37,8 +37,8 @@ app.post('/register', (req, res) => {
 });
 
 // Sender requests receiver's preKey Bundle 
-app.get('/connect/:registrationId', (req, res, next) => {
-    console.log("query string: ", req.params.registrationId); 
+app.get('/connect/:recipientId', (req, res, next) => {
+    console.log("query string: ", req.params.recipientId); 
 
     UserController.findIdentity(req, res);
 });

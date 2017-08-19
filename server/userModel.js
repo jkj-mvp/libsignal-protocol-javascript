@@ -14,9 +14,14 @@ mongoose.connection.once('open', () => {
 
 const userSchema = new Schema({
     user_info: {
-        recipientId: String, 
-        deviceId: Number
-    }, 
+        recipientId: {
+            type: String
+        }, 
+        deviceId: {
+            type: Number,
+            default: 0
+        }
+    },
     key_bundle: {
         registrationId: {
             type: Number
