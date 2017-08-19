@@ -141,24 +141,35 @@ function requestReceiversBundle() {
         success: (data) => {
             // receive Receiver's key bundle and store it in store
             console.log("Our recipient's key bundle is: ", data);
-            recipientObj = data;  
+            recipientObj = data;  // don't forget to use util.toArrayBuffer() on keys 
+            
+            console.log("Identity key BEFORE applying util.toArrayBuffer: ", recipientObj);
+            recipientObj.key_bundle.identityKey = util.toArrayBuffer(recipientObj.key_bundle.identityKey); 
+            recipientObj.key_bundle.preKey.publicKey = util.toArrayBuffer(recipientObj.key_bundle.preKey.publicKey);
+            recipientObj.key_bundle.signedPreKey.publicKey = util.toArrayBuffer(recipientObj.key_bundle.signedPreKey.publicKey);
+            recipientObj.key_bundle.signedPreKey.signature = util.toArrayBuffer(recipientObj.key_bundle.signedPreKey.signature);
+            console.log("RecipientObj AFTER applying util.toArrayBuffer: ", recipientObj);   
         }
     }); 
 }
 
 
-function startSession() {
+ startSession = async () => {
     console.log('Our recipientOb is ', recipientObj); 
 
     //  create receiver address 
     let recipientAddress = new libsignal.SignalProtocolAddress(recipientObj.user_info.recipientId, recipientObj.user_info.deviceId); 
 
     // create a session builder for a receiver's ID + device ID - (Receiver's address )
-    let builder = new libsignal.SessionBuilder(store, recipientAddress);
+    let sessionBuilder = new libsignal.SessionBuilder(store, recipientAddress);
+    
+    // process pre keys (verification & authenticaiton)
+    const sesssionPromise = await sessionBuilder.processPreKey(recipientObj.key_bundle); 
 
+    // store session 
+    store.storeSession(sessionPromise); d
 
-
-
+    return sessionPromise; 
 }
 
 
