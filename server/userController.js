@@ -25,7 +25,7 @@ const saveIdentity = (req, res, next) => {
             "identityKey": keyBundle.identityKey, //"sdfjaspdfjasdfjsladf"
             "signedPreKey": {
                 "keyId": keyBundle.signedPreKey.keyId, //222
-                "publicKey": keyBundle.signedPreKey.keyId, // "dfasgSGAWGASGWRGVASGSA",// //
+                "publicKey": keyBundle.signedPreKey.publicKey, // "dfasgSGAWGASGWRGVASGSA",// //
                 "signature": keyBundle.signedPreKey.signature //"DGASGASGDAGSfasvvdrse5vvys6"
             },
             "preKey": {
@@ -58,6 +58,7 @@ const findIdentity = (req, res) => {
         } else {
             console.log("Receiver's key bundle is: ", doc);
             res.status(200).send(doc);
+            // delete ephemeral keys here 
         }
     });
 }

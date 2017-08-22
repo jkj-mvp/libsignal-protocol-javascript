@@ -25271,7 +25271,7 @@ var Internal = Internal || {};
         },
         verify: function(pubKey, message, sig) {
             return new Promise(function(resolve, reject) {
-                if (Internal.curve25519.verify(pubKey, message, sig)) {
+                if (Internal.curve25519.verify(pubKey, message, sig)) { 
                     reject(new Error("Invalid signature"));
                 } else {
                     resolve();

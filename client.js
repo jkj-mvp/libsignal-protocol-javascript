@@ -1,13 +1,13 @@
 
 KeyHelper = libsignal.KeyHelper;
 const store = new SignalProtocolStore();
-let recipientObj = {}; 
+let recipientObj = {};
 
 // Load On Ready 
 $(() => {
     $('#register-keys').on('click', registerWithServer);
-    $('#get-recipient-keys').on('click', requestReceiversBundle); 
-    $('#create-session').on('click', startSession); 
+    $('#get-recipient-keys').on('click', requestReceiversBundle);
+    $('#create-session').on('click', startSession);
 });
 
 //     // $('#create-session').on('click', )
@@ -33,7 +33,8 @@ const generateIdentity = async (store) => {
 function generateKeysBundle(store) {
     // check our store for Identity Key Pair and registration ID
     // return them  as promises 
-    const keyID = 1337; // Our made up key ID 
+    const keyID = Math.floor((Math.random() * 4000) + 1); // Our made up key ID 
+    const signedKeyID = Math.floor((Math.random() * 4000) + 1)
 
     return Promise.all([
         store.getLocalRegistrationId(),
@@ -46,7 +47,7 @@ function generateKeysBundle(store) {
         // generatePreKey and signedPreKeys 
         return Promise.all([
             KeyHelper.generatePreKey(keyID), // fix  
-            KeyHelper.generateSignedPreKey(identKeyPair, keyID) // identKey, keyId
+            KeyHelper.generateSignedPreKey(identKeyPair, signedKeyID) // identKey, keyId
         ]).then((keys) => {
             const preKey = keys[0];
             console.log("(C): 3) our PreKeyPair is: ", preKey);
@@ -56,7 +57,7 @@ function generateKeysBundle(store) {
 
             // Store keys 
             store.storePreKey(keyID, preKey.keyPair);
-            store.storeSignedPreKey(keyID, signedPreKey.keyPair);
+            store.storeSignedPreKey(signedKeyID, signedPreKey.keyPair);
 
             // Bundle all the keys 
             console.log("(C): 6) Type of identity key pair ", typeof identKeyPair);
@@ -74,7 +75,7 @@ function generateKeysBundle(store) {
                         publicKey: util.toString(preKey.keyPair.pubKey),
                     },
                     signedPreKey: {
-                        keyId: keyID,
+                        keyId: signedKeyID,
                         publicKey: util.toString(signedPreKey.keyPair.pubKey),
                         signature: util.toString(signedPreKey.signature)
                     }
@@ -122,19 +123,19 @@ const ajaxRegisterKeys = (dataObj) => {
 
 
 function getRecipientIdFromPage() {
-    let recipientId = $('#recipient-id').val(); 
+    let recipientId = $('#recipient-id').val();
     // Ideally this is where validation would occur and prompt the user
     // to correct any mistakes ()
-    return recipientId; 
+    return recipientId;
 }
 
 // request Receiver's Key Bundle 
 function requestReceiversBundle() {
     // ajax GET request to server at  /connect/:registrationId 
     $.ajax({
-        type: 'GET', 
+        type: 'GET',
         url: 'http://localhost:3030/connect/' + getRecipientIdFromPage(),
-        dataType: 'json',  
+        dataType: 'json',
         error: () => {
             console.log("an error occurred while requesting Key Bundle.");
         },
@@ -142,34 +143,58 @@ function requestReceiversBundle() {
             // receive Receiver's key bundle and store it in store
             console.log("Our recipient's key bundle is: ", data);
             recipientObj = data;  // don't forget to use util.toArrayBuffer() on keys 
-            
+
             console.log("Identity key BEFORE applying util.toArrayBuffer: ", recipientObj);
-            recipientObj.key_bundle.identityKey = util.toArrayBuffer(recipientObj.key_bundle.identityKey); 
+            recipientObj.key_bundle.identityKey = util.toArrayBuffer(recipientObj.key_bundle.identityKey);
             recipientObj.key_bundle.preKey.publicKey = util.toArrayBuffer(recipientObj.key_bundle.preKey.publicKey);
             recipientObj.key_bundle.signedPreKey.publicKey = util.toArrayBuffer(recipientObj.key_bundle.signedPreKey.publicKey);
             recipientObj.key_bundle.signedPreKey.signature = util.toArrayBuffer(recipientObj.key_bundle.signedPreKey.signature);
-            console.log("RecipientObj AFTER applying util.toArrayBuffer: ", recipientObj);   
+            console.log("RecipientObj AFTER applying util.toArrayBuffer: ", recipientObj);
         }
-    }); 
+    });
 }
 
+let recipientAddress; 
 
- startSession = async () => {
-    console.log('Our recipientOb is ', recipientObj); 
+startSession = () => {
+    console.log('Our recipientOb is ', recipientObj);
 
     //  create receiver address 
-    let recipientAddress = new libsignal.SignalProtocolAddress(recipientObj.user_info.recipientId, recipientObj.user_info.deviceId); 
+    recipientAddress = new libsignal.SignalProtocolAddress(recipientObj.user_info.recipientId, recipientObj.user_info.deviceId);
+
+    console.log("Recipient address is: ", recipientAddress);
 
     // create a session builder for a receiver's ID + device ID - (Receiver's address )
     let sessionBuilder = new libsignal.SessionBuilder(store, recipientAddress);
-    
+
+    console.log("Befeore authentication. Our key bundle is: ", recipientObj.key_bundle);
     // process pre keys (verification & authenticaiton)
-    const sesssionPromise = await sessionBuilder.processPreKey(recipientObj.key_bundle); 
 
-    // store session 
-    store.storeSession(sessionPromise); d
+    const sessionPromise = sessionBuilder.processPreKey(recipientObj.key_bundle);
 
-    return sessionPromise; 
+    sessionPromise.then(function onsuccess() {
+
+        console.log("Time to send message");
+        var plaintext = "Hello world";
+        var sessionCipher = new libsignal.SessionCipher(store, recipientAddress);
+        sessionCipher.encrypt(plaintext).then(function (ciphertext) {
+            // ciphertext -> { type: <Number>, body: <string> }
+            handle(ciphertext.type, ciphertext.body);
+        });
+    });
+
+    sessionPromise.then(function onerror(error) {
+        console.log("Fuck! Identity key conflict.");
+    });
+
+
+    // const sesssionPromise = await sessionBuilder.processPreKey(recipientObj.key_bundle); 
+    //console.log("After authentication."); 
+
+    // // store session 
+    // store.storeSession(sessionPromise); 
+
+    // return sessionPromise; 
 }
 
 
@@ -179,14 +204,8 @@ function requestReceiversBundle() {
 
 
 // create a session cipher  
-
-
 // encrypt sender's message
 // decrypt receiver's message
-
-
-
-
 
 
 // const janelleRecipientId = "sadlfjadsjflas";
@@ -194,7 +213,11 @@ function requestReceiversBundle() {
 // let recipientAddress = '';
 
 /*
-var justino_address = new libsignal.SignalProtocolAddress("YYYYY", 1);
+const janelle_store = new SignalProtocolStore();
+const justino_store = new SignalProtocolStore();
+
+
+var justino_address = new libsignal.SignalProtocolAddress("6263430458", 1);
 var janelle_address = new libsignal.SignalProtocolAddress("BCBCB", 65);
 
 //janelle_store.address = janelle_address; 
