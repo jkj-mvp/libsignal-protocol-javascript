@@ -10,8 +10,6 @@ $(() => {
     $('#create-session').on('click', startSession);
 });
 
-//     // $('#create-session').on('click', )
-
 //**************REGISTER KEYS*****************/        
 
 const generateIdentity = async (store) => {
@@ -119,9 +117,6 @@ const ajaxRegisterKeys = (dataObj) => {
 
 
 //**************START SESSION*****************/
-
-
-
 function getRecipientIdFromPage() {
     let recipientId = $('#recipient-id').val();
     // Ideally this is where validation would occur and prompt the user
@@ -154,7 +149,7 @@ function requestReceiversBundle() {
     });
 }
 
-let recipientAddress; 
+let recipientAddress = {}; 
 
 startSession = () => {
     console.log('Our recipientOb is ', recipientObj);
@@ -172,182 +167,20 @@ startSession = () => {
 
     const sessionPromise = sessionBuilder.processPreKey(recipientObj.key_bundle);
 
+    // create session record 
+    //const sessionRecord = libsignal.SessionRecord(); 
+
     sessionPromise.then(function onsuccess() {
+
+        console.log("our session in the store is: ", store.loadSession()); 
 
         console.log("Time to send message");
         var plaintext = "Hello world";
-        var sessionCipher = new libsignal.SessionCipher(store, recipientAddress);
-        sessionCipher.encrypt(plaintext).then(function (ciphertext) {
+        var ourSessionCipher = new SessionCipher(store, recipientAddress);
+        console.log("Our Session Record is: ", ourSessionCipher.getRecord(recipientAddress)); 
+        ourSessionCipher.encrypt(plaintext).then(function (ciphertext) {
             // ciphertext -> { type: <Number>, body: <string> }
-            handle(ciphertext.type, ciphertext.body);
+            handle(ciphertext.type, ciphertext.body); // HERE NOW 
         });
     });
-
-    sessionPromise.then(function onerror(error) {
-        console.log("Fuck! Identity key conflict.");
-    });
-
-
-    // const sesssionPromise = await sessionBuilder.processPreKey(recipientObj.key_bundle); 
-    //console.log("After authentication."); 
-
-    // // store session 
-    // store.storeSession(sessionPromise); 
-
-    // return sessionPromise; 
 }
-
-
-
-// processPreKey fetched from server (RETURNS A PROMISE that resolves once a session is created 
-//  + saved in the store. OR rejects if the identityKey != saved identityKey for this address)
-
-
-// create a session cipher  
-// encrypt sender's message
-// decrypt receiver's message
-
-
-// const janelleRecipientId = "sadlfjadsjflas";
-// const janelleDeviceId = 5;
-// let recipientAddress = '';
-
-/*
-const janelle_store = new SignalProtocolStore();
-const justino_store = new SignalProtocolStore();
-
-
-var justino_address = new libsignal.SignalProtocolAddress("6263430458", 1);
-var janelle_address = new libsignal.SignalProtocolAddress("BCBCB", 65);
-
-//janelle_store.address = janelle_address; 
-
-var justinoPreKeyId = 1337;
-var justinoSignedKeyId = 1;
-
-Promise.all([
-    generateIdentity(janelle_store),
-    generateIdentity(justino_store)
-]).then(() => {
-    return generateKeysBundle(justino_store, justinoPreKeyId, justinoSignedKeyId);
-}).then(function (preKeyBundle) {
-    var builder = new libsignal.SessionBuilder(janelle_store, justino_address);
-    var builder2 = new libsignal.SessionBuilder(justino_store, janelle_address);
-
-    console.log("Justino's address: ", justino_address);
-    console.log("Janelle's address: ", janelle_address);
-
-    //builder.storeSession(); // identifier, record 
-
-    return builder.processPreKey(preKeyBundle).then(() => {
-        var originalMessage = util.toArrayBuffer("justino");
-
-        console.log("This is originalMessage: ", originalMessage);
-        var janelleSessionCipher = new libsignal.SessionCipher(janelle_store, justino_address);
-        var justinoSessionCipher = new libsignal.SessionCipher(justino_store, janelle_address);
-
-        //janelle encryption
-        janelleSessionCipher.encrypt(originalMessage).then(function (ciphertext) {
-            console.log("Our ciphertext is (inside Janelle encrypt): ", ciphertext);
-            return justinoSessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary');
-        }).then(function (plaintext) {
-            alert(util.toString(plaintext));
-        });
-
-        //justino encryption
-        justinoSessionCipher.encrypt(originalMessage).then(function (ciphertext) {
-            return janelleSessionCipher.decryptWhisperMessage(ciphertext.body, 'binary');
-        }).then(function (plaintext) {
-            assertEqualBuffers(plaintext, originalMessage);
-        });
-    });
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Start Session 
-// const startMySession = async (recipientId, recipientDeviceId, store, recipientKeyBundle) => {
-//     recipientAddress = new libsignal.SignalProtocolAddress(recipientId, recipientDeviceId);
-//     const sessionBuilder = new libsignal.SessionBuilder(store, recipientAddress);
-
-//     const sessionPromise = await sessionBuilder.processPreKey(recipientKeyBundle);
-
-//     return sessionPromise;
-
-// }
-
-// let plaintext = "Hi Janelle!!";
-// const sendMyMessage = (plaintext, store, recipientAddress, sessionPromise) => {
-//     //message from cryptpad
-//     const sessionCipher = new libsignal.SessionCipher(store, recipientAddress);
-
-//     sessionPromise.then( () => {
-//         sessionCipher.encrypt(plaintext).then((ciphertext) => {
-//             console.log('Plaintext - managed to pass sessionPromise', plaintext);
-//             console.log('Ciphertext - managed to pass sessionPromise', ciphertext);
-
-//             handle(ciphertext.type, ciphertext.body);
-//         });
-//     });
-// }
-
-
-
-// startMySession(janelleRecipientId, janelleDeviceId, store, keyBundle).then(() => {
-//     sendMyMessage(plaintext, store, recipientAddress, startMySession);
-// });
-
-
-// SESSION 
-// var address = new libsignal.SignalProtocolAddress(recipientId, deviceId);
-
-// // Instantiate a SessionBuilder for a remote recipientId + deviceId tuple.
-// SessionBuilder = new libsignal.SessionBuilder(store, address);
-
-// // Process a prekey fetched from the server. Returns a promise that resolves
-// // once a session is created and saved in the store, or rejects if the
-// // identityKey differs from a previously seen identity for this address.
-// var promise = sessionBuilder.processPreKey({
-//     registrationId: Number,
-//     identityKey: ArrayBuffer,
-//     signedPreKey: {
-//         keyId: Number,
-//         publicKey: ArrayBuffer,
-//         signature: ArrayBuffer
-//     },
-//     preKey: {
-//         keyId: Number,
-//         publicKey: ArrayBuffer
-//     }
-// });
-
-// promise.then(function onsuccess() {
-//     // encrypt messages
-
-// });
-
-// promise.catch(function onerror(error) {
-//     // handle identity key conflict
-// });
-*/
